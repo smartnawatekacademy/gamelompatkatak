@@ -1,0 +1,1990 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lompat Katak Matematika</title>
+    <style>
+        :root {
+            --bg-color: #0f2027;
+            --primary: #4CAF50;
+            --text: #ffffff;
+            --water: #0083B0;
+            --water-dark: #00B4DB;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to bottom, var(--bg-color), #203a43, #2c5364);
+            color: var(--text);
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* UI Overlays */
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: flex-end;
+            padding: 10px 20px;
+            pointer-events: auto;
+            gap: 10px;
+        }
+
+        button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        /* --- SPLASH SCREEN STYLES --- */
+        #splash-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 500;
+            transition: opacity 0.8s ease, visibility 0.8s;
+            overflow: hidden;
+            pointer-events: auto;
+        }
+
+        #splash-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .splash-title {
+            font-size: 4.5rem;
+            color: #ffffff;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.2), 3px 3px 0px #4CAF50, -3px -3px 0px #4CAF50, 3px -3px 0px #4CAF50, -3px 3px 0px #4CAF50;
+            margin-bottom: 5px;
+            text-align: center;
+            animation: floatText 3s ease-in-out infinite;
+            z-index: 2;
+        }
+
+        .splash-subtitle {
+            font-size: 1.5rem;
+            color: #1a4a38;
+            font-weight: bold;
+            margin-bottom: 30px;
+            background: rgba(255,255,255,0.6);
+            padding: 8px 25px;
+            border-radius: 25px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            z-index: 2;
+        }
+
+        .splash-frog {
+            font-size: 9rem;
+            animation: bounceFrog 2s infinite;
+            filter: drop-shadow(0 15px 15px rgba(0,0,0,0.4));
+            margin-bottom: 30px;
+            z-index: 2;
+        }
+
+        .splash-btn {
+            background: linear-gradient(135deg, #FF416C, #FF4B2B);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            box-shadow: 0 10px 20px rgba(255, 65, 108, 0.4);
+            cursor: pointer;
+            animation: pulseBtn 1.5s infinite;
+            transition: transform 0.2s;
+            z-index: 2;
+        }
+
+        .splash-btn:active {
+            transform: scale(0.9);
+        }
+
+        .splash-decor {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            animation: floatUp infinite linear;
+            z-index: 1;
+        }
+
+        @keyframes bounceFrog {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-40px) scale(1.1); }
+        }
+
+        @keyframes pulseBtn {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 65, 108, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 25px rgba(255, 65, 108, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 65, 108, 0); }
+        }
+
+        @keyframes floatText {
+            0%, 100% { transform: translateY(0) rotate(-2deg); }
+            50% { transform: translateY(-15px) rotate(2deg); }
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(110vh) scale(0.5); opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+        }
+        /* --- END SPLASH SCREEN STYLES --- */
+
+        /* --- FITUR 2: TUTORIAL MODAL --- */
+        #tutorial-modal {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 600;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        #tutorial-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .tutorial-content {
+            background: linear-gradient(135deg, #ffffff, #e6e6e6);
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 400px;
+            width: 90%;
+            color: #333;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            text-align: left;
+        }
+
+        .tutorial-content h2 { color: #4CAF50; margin-bottom: 20px; text-align: center; }
+        .tutorial-content ul { list-style: none; padding: 0; }
+        .tutorial-content li { margin-bottom: 15px; font-size: 1.1rem; line-height: 1.4; }
+        
+        .tutorial-btn-close {
+            display: block; width: 100%; padding: 15px;
+            background: #ff416c; color: white; text-align: center;
+            border: none; border-radius: 10px; font-weight: bold; font-size: 1.1rem; cursor: pointer;
+            margin-top: 20px; transition: 0.2s;
+        }
+
+        .tutorial-btn-close:active { transform: scale(0.95); }
+
+        .btn-help {
+            position: absolute;
+            top: 20px; left: 20px;
+            background: rgba(255,255,255,0.2); border: 2px solid white;
+            border-radius: 50%; width: 45px; height: 45px;
+            font-size: 1.5rem; font-weight: bold; display: flex;
+            align-items: center; justify-content: center; cursor: pointer;
+            color: white; transition: transform 0.2s;
+        }
+
+        .btn-help:hover { transform: scale(1.1); background: rgba(255,255,255,0.4); }
+        /* --- END TUTORIAL --- */
+
+        /* Registration Screen */
+        #registration-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            z-index: 300;
+            transition: opacity 0.3s ease, visibility 0.3s;
+        }
+
+        #registration-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 90%;
+            max-width: 450px;
+            margin-top: 20px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .form-container label {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #78ffd6;
+            margin-bottom: -10px;
+        }
+
+        .form-container input, .form-container select {
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            font-size: 1rem;
+            outline: none;
+            background: rgba(255, 255, 255, 0.9);
+            font-family: inherit;
+        }
+
+        .form-container input:focus, .form-container select:focus {
+            box-shadow: 0 0 10px #38ef7d;
+        }
+        
+        .player-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 5px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .form-container button {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+            flex: 1;
+        }
+
+        .form-container button.btn-back {
+            background: #666;
+            flex: 0.4;
+        }
+
+        .form-container button:hover {
+            transform: scale(1.05);
+        }
+
+        #error-message {
+            background: #ff416c;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+            display: none;
+            animation: shake 0.3s ease-in-out;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        /* Main Menu */
+        #menu {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            z-index: 200;
+            transition: opacity 0.5s ease, visibility 0.5s;
+        }
+
+        #menu.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        h1 {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            color: #a8ff78;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: #78ffd6;
+            text-align: center;
+        }
+
+        .menu-box {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 90%;
+            max-width: 380px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .mode-btn {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            border: none;
+            padding: 15px 20px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+            width: 100%;
+        }
+
+        .mode-btn:hover {
+            transform: scale(1.03);
+        }
+
+        .mode-btn:active {
+            transform: scale(0.97);
+        }
+
+        .mode-btn div {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mode-btn span {
+            font-size: 0.9rem;
+            font-weight: normal;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+
+        .btn-leaderboard {
+            background: linear-gradient(135deg, #FF416C, #FF4B2B);
+            box-shadow: 0 5px 15px rgba(255, 65, 108, 0.4);
+            margin-top: 10px;
+        }
+
+        /* Leaderboard Screen */
+        #leaderboard-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            z-index: 400;
+            transition: opacity 0.3s ease, visibility 0.3s;
+        }
+
+        #leaderboard-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .lb-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 90%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-height: 90vh;
+        }
+
+        /* Podium */
+        .podium-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 10px;
+            height: 160px;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .podium-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 30%;
+            border-radius: 8px 8px 0 0;
+            padding: 10px;
+            color: #000;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        .podium-name {
+            font-size: 0.85rem;
+            color: white;
+            position: absolute;
+            top: -25px;
+            white-space: nowrap;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .podium-score { font-size: 1.2rem; margin-top: auto; }
+        .podium-gold { background: linear-gradient(to bottom, #FFD700, #DAA520); height: 130px; order: 2; z-index: 3; }
+        .podium-silver { background: linear-gradient(to bottom, #E0E0E0, #9E9E9E); height: 90px; order: 1; z-index: 2; }
+        .podium-bronze { background: linear-gradient(to bottom, #CD7F32, #8B4513); height: 60px; order: 3; z-index: 1; }
+        .podium-highlight { box-shadow: 0 0 20px #38ef7d, 0 -5px 15px rgba(0,0,0,0.5); border: 2px solid #38ef7d; }
+
+        /* Table Leaderboard */
+        .table-container {
+            width: 100%;
+            flex: 1;
+            overflow-y: auto;
+            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
+            scrollbar-width: thin;
+            scrollbar-color: #38ef7d rgba(0,0,0,0.2);
+        }
+
+        .table-container::-webkit-scrollbar { width: 6px; }
+        .table-container::-webkit-scrollbar-thumb { background: #38ef7d; border-radius: 3px; }
+
+        .lb-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .lb-row:last-child { border-bottom: none; }
+        .lb-row.current-user {
+            background: rgba(56, 239, 125, 0.3);
+            font-weight: bold;
+            color: #78ffd6;
+            border-left: 4px solid #38ef7d;
+        }
+
+        .btn-close-lb {
+            background: #666;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        /* Footer Styles */
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .footer .social-links {
+            margin-bottom: 8px;
+        }
+
+        .footer .social-links a {
+            color: #78ffd6;
+            text-decoration: none;
+            margin: 0 10px;
+            font-weight: bold;
+            transition: color 0.3s, text-shadow 0.3s;
+            display: inline-block;
+        }
+
+        .footer .social-links a:hover {
+            color: #ffffff;
+            text-shadow: 0 0 8px #38ef7d;
+        }
+
+        .footer .copyright strong {
+            color: #38ef7d;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* Game Container Layouts */
+        #game-container {
+            flex: 1;
+            display: grid;
+            width: 100%;
+            height: 100%;
+            gap: 4px;
+            background: #000;
+        }
+
+        .solo { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+        
+        @media (orientation: portrait) {
+            .duel { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+            .squad { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+        }
+        
+        @media (orientation: landscape) {
+            .duel { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr; }
+            .squad { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+        }
+
+        .player-view {
+            position: relative;
+            background: linear-gradient(to bottom, #87CEEB, #0083B0);
+            overflow: hidden;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Player UI overlays (inside player-view) */
+        .player-ui {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 10px;
+        }
+
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        }
+
+        .question-box {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+            align-self: center;
+            min-width: 60%;
+        }
+
+        .game-over-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none; 
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 10;
+        }
+
+        .game-over-overlay.active {
+            opacity: 1;
+            pointer-events: auto; 
+        }
+
+        .restart-btn {
+            margin-top: 15px;
+            background: #ff416c;
+            border: none;
+            padding: 10px 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LAYER SPLASH SCREEN -->
+    <div id="splash-screen">
+        <div class="splash-decor" style="left: 10%; width: 50px; height: 50px; animation-duration: 6s; animation-delay: 0s;"></div>
+        <div class="splash-decor" style="left: 30%; width: 30px; height: 30px; animation-duration: 5s; animation-delay: 2s;"></div>
+        <div class="splash-decor" style="left: 70%; width: 80px; height: 80px; animation-duration: 8s; animation-delay: 1s;"></div>
+        <div class="splash-decor" style="left: 85%; width: 40px; height: 40px; animation-duration: 7s; animation-delay: 3s;"></div>
+
+        <h1 class="splash-title">Lompat Katak!</h1>
+        <div class="splash-subtitle">Petualangan Matematika Seru</div>
+        <div class="splash-frog">🐸</div>
+        <button class="splash-btn" onclick="enterMainMenu()">Mulai Main!</button>
+    </div>
+
+    <div id="ui-layer">
+        <div class="top-bar">
+            <!-- Tambahan Tombol Pause -->
+            <button id="btn-pause" onclick="togglePause()" class="hidden" style="display:none; background: linear-gradient(135deg, #f2994a, #f2c94c);">⏸ Jeda</button>
+            <button id="btn-audio" onclick="toggleAudio()">🔊 Audio ON</button>
+            <button id="btn-fs" onclick="toggleFullScreen()">⛶ Fullscreen</button>
+        </div>
+    </div>
+
+    <!-- Menu Utama -->
+    <div id="menu" class="hidden">
+        <button class="btn-help" onclick="showTutorial()" title="Cara Bermain">?</button>
+        <h1>🐸 Lompat Katak</h1>
+        <div class="subtitle">Belajar Penjumlahan, Pengurangan, Perkalian & Pembagian Dasar</div>
+        <div class="menu-box">
+            <button class="mode-btn" onclick="prepareRegistration(1)">
+                <div>👤 Solo Mode</div>
+                <span>1 Pemain</span>
+            </button>
+            <button class="mode-btn" onclick="prepareRegistration(2)">
+                <div>⚔️ Duel Mode</div>
+                <span>2 Pemain</span>
+            </button>
+            <button class="mode-btn" onclick="prepareRegistration(4)">
+                <div>🛡️ Squad Mode</div>
+                <span>4 Pemain</span>
+            </button>
+            <button class="mode-btn btn-leaderboard" onclick="showLeaderboard()">
+                <div>🏆 Papan Skor</div>
+                <span>Peringkat</span>
+            </button>
+        </div>
+
+        <div class="footer">
+            <div class="social-links">
+                <a href="https://instagram.com/ramlanmarbunlg" target="_blank" title="Instagram">📱 @ramlanmarbunlg</a>
+                <a href="https://www.ramlanmarbun.my.id" target="_blank" title="Website Resmi">🌐 www.ramlanmarbun.my.id</a>
+            </div>
+            <div class="copyright">
+                &copy; 2026 <a href="https://www.smartcorpora.id" target="_blank" title="SMART NawaTek Academy" style="color:#38ef7d; text-decoration: none;"><strong>SMART NawaTek Academy</strong></a> | Developed by Ramlan Marbun
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Registrasi -->
+    <div id="registration-screen" class="hidden">
+        <h1 id="reg-title">Pendaftaran</h1>
+        <div class="form-container">
+            
+            <label for="input-school">Asal Sekolah</label>
+            <input type="text" id="input-school" placeholder="Masukkan asal sekolah..." autocomplete="off">
+            
+            <div id="dynamic-name-inputs" style="display: flex; flex-direction: column; gap: 15px; margin-top: 10px;"></div>
+            
+            <div id="error-message">⚠️ Semua data wajib diisi!</div>
+            
+            <div class="btn-group">
+                <button class="btn-back" onclick="backToMenu()">Kembali</button>
+                <button onclick="validateAndStart()">Lanjut</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaderboard Screen -->
+    <div id="leaderboard-screen" class="hidden">
+        <div class="lb-container">
+            <h2 style="color: #FFD700; text-shadow: 0 2px 5px rgba(0,0,0,0.5); font-size: 2rem; margin-bottom: 5px;">🏆 Papan Skor</h2>
+            
+            <div class="podium-container">
+                <div class="podium-step podium-silver" id="podium-2"></div>
+                <div class="podium-step podium-gold" id="podium-1"></div>
+                <div class="podium-step podium-bronze" id="podium-3"></div>
+            </div>
+
+            <div class="table-container" id="lb-table-body">
+            </div>
+
+            <button class="btn-close-lb" onclick="closeLeaderboard()">Tutup Papan Skor</button>
+        </div>
+    </div>
+
+    <!-- FITUR 2: Tutorial Pop-up -->
+    <div id="tutorial-modal">
+        <div class="tutorial-content">
+            <h2>Cara Bermain 🐸</h2>
+            <ul>
+                <li>👆 <strong>Pilih Mode:</strong> Main sendiri atau bersama teman-teman (maksimal 4 pemain).</li>
+                <li>🧮 <strong>Jawab Cepat:</strong> Ketuk daun yang memiliki jawaban matematika yang benar.</li>
+                <li>🔥 <strong>Combo Api:</strong> Jawab 3x berturut-turut dengan cepat untuk dapat poin bonus!</li>
+                <li>⏳ <strong>Hati-hati:</strong> Waktu terus berjalan. Jangan sampai kehabisan waktu atau menjawab salah ya!</li>
+            </ul>
+            <button class="tutorial-btn-close" onclick="closeTutorial()">Paham, Ayo Main!</button>
+        </div>
+    </div>
+
+    <div id="game-container"></div>
+
+<script>
+/* ==========================================================================
+   AUDIO ENGINE (Web Audio API)
+   ========================================================================== */
+let audioCtx;
+let audioEnabled = true;
+
+// Data registrasi global
+let registeredNames = [];
+let registeredColors = [];
+let registeredSchool = "";
+let pendingMode = 1;
+let lastPlayedName = ""; 
+let lastPlayedScore = 0; 
+let isPaused = false;
+
+function enterMainMenu() {
+    initAudio();
+    playCorrect(); 
+    document.getElementById('splash-screen').classList.add('hidden');
+    document.getElementById('menu').classList.remove('hidden');
+}
+
+function initLeaderboardData() {
+    if (!localStorage.getItem('lompatKatakLB')) {
+        const dummyData = [
+            { name: "Siswa Hebat", school: "SD Pintar", score: 150, id: "bot1" },
+            { name: "Juara Matematika", school: "SD Cerdas", score: 120, id: "bot2" },
+            { name: "Anak Rajin", school: "SD Juara", score: 90, id: "bot3" },
+            { name: "Pemula Tangguh", school: "SD Ceria", score: 60, id: "bot4" },
+            { name: "Katak Pelompat", school: "SD Alam", score: 30, id: "bot5" }
+        ];
+        localStorage.setItem('lompatKatakLB', JSON.stringify(dummyData));
+    }
+}
+initLeaderboardData();
+
+const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzsOzVwQa4OG2ZLCrH-jSdfUPVjR4G8Z3CnO9fQCfW0QNVtmTMB09kO_zhGWkMkMLP2/exec"; 
+
+function saveScore(name, school, score) {
+    let lb = JSON.parse(localStorage.getItem('lompatKatakLB')) || [];
+    if (score > 0) {
+        lastPlayedName = name; 
+        lastPlayedScore = score;
+        
+        lb.push({ name, school: school || "Tanpa Sekolah", score });
+        lb.sort((a,b) => b.score - a.score);
+        lb = lb.slice(0, 100);
+        localStorage.setItem('lompatKatakLB', JSON.stringify(lb));
+
+        if (GOOGLE_SHEET_URL !== "") {
+            const formData = new URLSearchParams();
+            formData.append('timestamp', new Date().toLocaleString('id-ID'));
+            formData.append('school', school || "Tanpa Sekolah");
+            formData.append('name', name);
+            formData.append('score', score);
+
+            fetch(GOOGLE_SHEET_URL, {
+                method: 'POST',
+                body: formData 
+            })
+            .then(response => console.log("Skor berhasil diamankan ke Spreadsheet Pusat!"))
+            .catch(error => console.error("Gagal menyambung ke Spreadsheet:", error));
+        }
+    }
+}
+
+function renderLeaderboardUI(lb) {
+    const renderPodium = (elementId, data, medalIcon) => {
+        const el = document.getElementById(elementId);
+        if (data) {
+            el.innerHTML = `
+                <div class="podium-name">${data.name}</div>
+                <div style="font-size:2rem; margin-top: -10px; margin-bottom: 5px;">${medalIcon}</div>
+                <div class="podium-score">${data.score}</div>
+            `;
+            if (data.name === lastPlayedName && data.score === lastPlayedScore) {
+                el.classList.add('podium-highlight');
+            } else {
+                el.classList.remove('podium-highlight');
+            }
+            el.style.visibility = "visible";
+        } else {
+            el.style.visibility = "hidden"; 
+        }
+    };
+
+    renderPodium('podium-1', lb[0], '🥇');
+    renderPodium('podium-2', lb[1], '🥈');
+    renderPodium('podium-3', lb[2], '🥉');
+
+    const tbody = document.getElementById('lb-table-body');
+    tbody.innerHTML = '';
+    
+    let userRowToScroll = null;
+
+    for (let i = 3; i < lb.length; i++) {
+        let row = document.createElement('div');
+        row.className = 'lb-row';
+        if (lb[i].name === lastPlayedName && lb[i].score === lastPlayedScore) {
+            row.classList.add('current-user');
+            userRowToScroll = row;
+        }
+        row.innerHTML = `
+            <div style="flex: 0.5; font-weight: bold; color: #FFD700;">#${i+1}</div>
+            <div style="flex: 2.5; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                ${lb[i].name} <br>
+                <span style="font-size:0.75rem; color:rgba(255,255,255,0.6);">${lb[i].school || ''}</span>
+            </div>
+            <div style="flex: 1; text-align: right; font-weight: bold; font-size: 1.1rem;">${lb[i].score}</div>
+        `;
+        tbody.appendChild(row);
+    }
+
+    if (userRowToScroll) {
+        setTimeout(() => {
+            userRowToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300); 
+    }
+}
+
+function showLeaderboard() {
+    initAudio();
+    document.getElementById('menu').classList.add('hidden');
+    document.getElementById('leaderboard-screen').classList.remove('hidden');
+
+    const tbody = document.getElementById('lb-table-body');
+    tbody.innerHTML = '<div style="text-align:center; padding:30px; color:#78ffd6; font-weight:bold;">Sedang memuat data, silakan tunggu... ⏳</div>';
+    
+    document.getElementById('podium-1').style.visibility = "hidden";
+    document.getElementById('podium-2').style.visibility = "hidden";
+    document.getElementById('podium-3').style.visibility = "hidden";
+
+    if (GOOGLE_SHEET_URL !== "") {
+        fetch(GOOGLE_SHEET_URL)
+            .then(response => response.json())
+            .then(data => {
+                localStorage.setItem('lompatKatakLB', JSON.stringify(data));
+                renderLeaderboardUI(data);
+            })
+            .catch(error => {
+                console.error("Gagal memuat dari server, menggunakan data lokal:", error);
+                let lb = JSON.parse(localStorage.getItem('lompatKatakLB')) || [];
+                renderLeaderboardUI(lb);
+            });
+    } else {
+        let lb = JSON.parse(localStorage.getItem('lompatKatakLB')) || [];
+        renderLeaderboardUI(lb);
+    }
+}
+
+function closeLeaderboard() {
+    document.getElementById('leaderboard-screen').classList.add('hidden');
+    document.getElementById('menu').classList.remove('hidden');
+}
+
+function prepareRegistration(numPlayers) {
+    initAudio(); 
+    pendingMode = numPlayers;
+    
+    const title = numPlayers === 1 ? "👤 Solo Mode" : (numPlayers === 2 ? "⚔️ Duel Mode" : "🛡️ Squad Mode");
+    document.getElementById('reg-title').innerText = title;
+
+    const container = document.getElementById('dynamic-name-inputs');
+    container.innerHTML = ''; 
+
+    for(let i=1; i<=numPlayers; i++) {
+        // FITUR 3: Pilihan Karakter (Warna Katak) ditambahkan pada form pendaftaran
+        container.innerHTML += `
+            <div class="player-input-group">
+                <label for="input-name-${i}">Nama Pemain ${i}</label>
+                <input type="text" id="input-name-${i}" placeholder="Nama Pemain ${i}..." autocomplete="off">
+                <label for="input-color-${i}">Warna Katak:</label>
+                <select id="input-color-${i}">
+                    <option value="#4CAF50">Hijau Alam</option>
+                    <option value="#2196F3">Biru Langit</option>
+                    <option value="#F44336">Merah Berani</option>
+                    <option value="#FF9800">Oranye Semangat</option>
+                </select>
+            </div>
+        `;
+    }
+
+    document.getElementById('error-message').style.display = 'none';
+    document.getElementById('menu').classList.add('hidden');
+    document.getElementById('registration-screen').classList.remove('hidden');
+}
+
+function backToMenu() {
+    document.getElementById('registration-screen').classList.add('hidden');
+    document.getElementById('menu').classList.remove('hidden');
+}
+
+function validateAndStart() {
+    const schoolInput = document.getElementById('input-school').value.trim();
+    const errorMsg = document.getElementById('error-message');
+    
+    let allValid = true;
+    let tempNames = [];
+    let tempColors = [];
+
+    if (!schoolInput) allValid = false;
+
+    for(let i=1; i<=pendingMode; i++) {
+        let nameVal = document.getElementById(`input-name-${i}`).value.trim();
+        let colorVal = document.getElementById(`input-color-${i}`).value;
+        if (!nameVal) allValid = false;
+        tempNames.push(nameVal);
+        tempColors.push(colorVal);
+    }
+
+    if (!allValid) {
+        errorMsg.style.display = 'block';
+        errorMsg.style.animation = 'none';
+        errorMsg.offsetHeight; 
+        errorMsg.style.animation = null; 
+        return;
+    }
+
+    errorMsg.style.display = 'none';
+    registeredSchool = schoolInput;
+    registeredNames = tempNames;
+    registeredColors = tempColors;
+
+    document.getElementById('registration-screen').classList.add('hidden');
+    
+    // Tampilkan tombol pause
+    document.getElementById('btn-pause').style.display = 'inline-block';
+    
+    startGame(pendingMode);
+}
+
+function togglePause() {
+    isPaused = !isPaused;
+    document.getElementById('btn-pause').innerText = isPaused ? "▶ Lanjut" : "⏸ Jeda";
+}
+
+function initAudio() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+}
+
+function playTone(freq, type, duration, vol=0.1) {
+    if (!audioEnabled || !audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+}
+
+function playJump() {
+    if (!audioEnabled || !audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.2);
+    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.2);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.2);
+}
+
+function playCorrect() {
+    if (!audioEnabled || !audioCtx) return;
+    playTone(440, 'sine', 0.1, 0.1);
+    setTimeout(() => playTone(554, 'sine', 0.1, 0.1), 100);
+    setTimeout(() => playTone(659, 'sine', 0.2, 0.1), 200);
+}
+
+function playSplash() {
+    if (!audioEnabled || !audioCtx) return;
+    const bufferSize = audioCtx.sampleRate * 0.5;
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+    }
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buffer;
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(1000, audioCtx.currentTime);
+    filter.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.5);
+    const gain = audioCtx.createGain();
+    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(audioCtx.destination);
+    noise.start();
+}
+
+function toggleAudio() {
+    initAudio();
+    audioEnabled = !audioEnabled;
+    document.getElementById('btn-audio').innerText = audioEnabled ? "🔊 Audio ON" : "🔇 Audio OFF";
+}
+
+function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+            console.log(`Error: ${err.message}`);
+        });
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+}
+
+/* ==========================================================================
+   MATH ENGINE - FITUR 2: TINGKAT KESULITAN DINAMIS (Auto-Leveling)
+   ========================================================================== */
+function generateQuestion(currentScore) {
+    let level = 1;
+    if (currentScore >= 200) level = 3;
+    else if (currentScore >= 100) level = 2;
+
+    let availableOps = [0, 1]; // + and -
+    if (level >= 2) availableOps.push(2); // * (Mulai muncul jika skor >= 100)
+    if (level >= 3) availableOps.push(3); // / (Mulai muncul jika skor >= 200)
+
+    const operationType = availableOps[Math.floor(Math.random() * availableOps.length)];
+    let num1, num2, answer, questionText;
+
+    switch(operationType) {
+        case 0: // Penjumlahan
+            let maxAdd = level === 3 ? 20 : 10;
+            num1 = Math.floor(Math.random() * maxAdd) + 1;
+            num2 = Math.floor(Math.random() * maxAdd) + 1;
+            answer = num1 + num2;
+            questionText = `${num1} + ${num2}`;
+            break;
+        case 1: // Pengurangan
+            let maxSub = level === 3 ? 20 : 10;
+            answer = Math.floor(Math.random() * maxSub) + 1;
+            num2 = Math.floor(Math.random() * maxSub) + 1;
+            num1 = answer + num2; 
+            questionText = `${num1} - ${num2}`;
+            break;
+        case 2: // Perkalian
+            let maxMul = level === 3 ? 10 : 5;
+            num1 = Math.floor(Math.random() * maxMul) + 1;
+            num2 = Math.floor(Math.random() * maxMul) + 1;
+            answer = num1 * num2;
+            questionText = `${num1} × ${num2}`;
+            break;
+        case 3: // Pembagian
+            answer = Math.floor(Math.random() * 10) + 1;
+            num2 = Math.floor(Math.random() * 9) + 2; 
+            num1 = answer * num2;
+            questionText = `${num1} ÷ ${num2}`;
+            break;
+    }
+
+    let options = new Set([answer]);
+    while (options.size < 4) {
+        let offset = Math.floor(Math.random() * 5) - 2;
+        if (offset === 0) offset = 3;
+        let fakeAnswer = answer + offset;
+        if (fakeAnswer > 0) options.add(fakeAnswer);
+    }
+
+    let optionsArray = Array.from(options);
+    for (let i = optionsArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [optionsArray[i], optionsArray[j]] = [optionsArray[j], optionsArray[i]];
+    }
+
+    return {
+        text: questionText,
+        correct: answer,
+        options: optionsArray
+    };
+}
+
+/* ==========================================================================
+   GAME ENGINE & RENDERING
+   ========================================================================== */
+class PlayerInstance {
+    constructor(container, id, name, color) {
+        this.container = container;
+        this.id = id;
+        this.name = name;
+        this.color = color || '#4CAF50'; // Default warna hijau jika gagal dimuat
+        
+        this.wrapper = document.createElement('div');
+        this.wrapper.className = 'player-view';
+        
+        this.canvas = document.createElement('canvas');
+        this.ctx = this.canvas.getContext('2d');
+        
+        this.uiLayer = document.createElement('div');
+        this.uiLayer.className = 'player-ui';
+        
+        this.header = document.createElement('div');
+        this.header.className = 'player-header';
+        this.header.innerHTML = `
+            <span>${this.name}</span>
+            <div>
+                <span id="lives-${this.id}" style="margin-right: 10px; font-size: 1.1rem; text-shadow: none;"></span>
+                <span id="score-${this.id}">Skor: 0</span>
+            </div>
+        `;
+        
+        this.qBox = document.createElement('div');
+        this.qBox.className = 'question-box';
+        this.qBox.id = `q-${this.id}`;
+        
+        this.gameOverOverlay = document.createElement('div');
+        this.gameOverOverlay.className = 'game-over-overlay';
+        
+        // FITUR 1: Struktur HTML untuk Rapor Belajar Singkat
+        this.gameOverOverlay.innerHTML = `
+            <h2 style="margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">Game Over!</h2>
+            <div style="background: rgba(255,255,255,0.95); color: #333; padding: 15px; border-radius: 12px; text-align: center; width: 85%; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
+                <h3 id="predikat-${this.id}" style="color: #4CAF50; margin-bottom: 5px; font-size: 1.4rem;">Luar Biasa!</h3>
+                <p style="font-size: 1.3rem; font-weight: bold; margin-bottom: 15px; border-bottom: 2px dashed #ccc; padding-bottom: 10px;">Skor: <span id="final-score-${this.id}">0</span></p>
+                <div style="display: flex; justify-content: space-around; font-size: 1.1rem; font-weight: bold;">
+                    <span style="color: #4CAF50;">✅ <span id="benar-${this.id}">0</span></span>
+                    <span style="color: #ff416c;">❌ <span id="salah-${this.id}">0</span></span>
+                </div>
+            </div>
+            <p style="margin-top: 15px; font-size: 0.9rem; color: #ddd;">Menunggu permainan selesai...</p>
+        `;
+        
+        this.uiLayer.appendChild(this.header);
+        this.uiLayer.appendChild(this.qBox);
+        
+        this.wrapper.appendChild(this.canvas);
+        this.wrapper.appendChild(this.uiLayer);
+        this.wrapper.appendChild(this.gameOverOverlay);
+        this.container.appendChild(this.wrapper);
+        
+        this.canvas.addEventListener('mousedown', (e) => this.handleInput(e));
+        this.canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            this.handleInput(e.touches[0]);
+        }, {passive: false});
+
+        this.resize();
+        this.resetState();
+        
+        window.addEventListener('resize', () => this.resize());
+    }
+
+    resetState() {
+        this.score = 0;
+        this.isGameOver = false;
+        this.cameraY = 0;
+        this.targetCameraY = 0;
+        this.particles = [];
+        this.ripples = [];
+        this.rain = [];
+        
+        // FITUR 4: Timer Waktu (15 Detik per soal)
+        this.maxTime = 15.0; 
+        this.timeLeft = this.maxTime;
+        
+        // FITUR 1: Feedback Jawaban Salah & Rapor
+        this.isShowingFeedback = false;
+        this.feedbackTimer = 0;
+        this.correctAnswerText = "";
+        this.correctCount = 0;
+        this.wrongCount = 0;
+
+        // FITUR 3: Sistem Combo
+        this.comboCount = 0;
+        this.comboTimer = 0;
+
+        // FITUR 4: Variabel Tema Latar Belakang & Bintang Malam
+        this.currentTheme = 0; // 0: Siang, 1: Sore, 2: Malam
+        this.wrapper.style.background = 'linear-gradient(to bottom, #87CEEB, #0083B0)';
+        this.stars = [];
+        for(let i=0; i<40; i++) {
+            this.stars.push({
+                x: Math.random() * 2000, 
+                y: Math.random() * 2000,
+                size: Math.random() * 2 + 0.5,
+                alpha: Math.random()
+            });
+        }
+
+        this.frog = {
+            x: 0, y: 0, 
+            targetX: 0, targetY: 0,
+            isJumping: false,
+            isFalling: false,
+            progress: 0,
+            startY: 0, startX: 0
+        };
+
+        this.rows = [];
+        this.currentRowIndex = 0;
+        
+        this.gameOverOverlay.classList.remove('active');
+        document.getElementById(`score-${this.id}`).innerText = `Skor: 0`;
+
+        this.lives = 3;
+        this.updateLivesUI();
+        
+        this.resize();
+        
+        for(let i=0; i<3; i++) {
+            this.generateRow(i);
+        }
+        
+        this.frog.x = this.canvas.width / 2;
+        this.frog.y = this.rows[0].y;
+        this.frog.targetX = this.frog.x;
+        this.frog.targetY = this.frog.y;
+        
+        this.updateQuestion();
+    }
+
+    resize() {
+        const rect = this.wrapper.getBoundingClientRect();
+        this.canvas.width = rect.width;
+        this.canvas.height = rect.height;
+        this.rowSpacing = this.canvas.height / 2;
+
+        if (this.rows && this.rows.length > 0) {
+            const leafWidth = Math.min(80, this.canvas.width / 5);
+            const spacing = this.canvas.width / 4;
+            
+            for (let row of this.rows) {
+                row.y = this.canvas.height - (row.index * this.rowSpacing) - 100;
+                if (row.index === 0) {
+                    if (row.leaves[0]) {
+                        row.leaves[0].x = this.canvas.width / 2;
+                        row.leaves[0].y = row.y;
+                        row.leaves[0].width = leafWidth * 1.5;
+                    }
+                } else {
+                    for (let i = 0; i < 4; i++) {
+                        if (row.leaves[i]) {
+                            row.leaves[i].x = (i * spacing) + (spacing / 2);
+                            row.leaves[i].y = row.y;
+                            row.leaves[i].width = leafWidth;
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (this.frog && !this.frog.isJumping && !this.frog.isFalling && !this.isShowingFeedback) {
+            this.frog.x = this.canvas.width / 2;
+            if (this.rows && this.rows.length > 0) {
+                 this.frog.y = this.rows[this.currentRowIndex].y;
+                 this.frog.targetX = this.frog.x;
+                 this.frog.targetY = this.frog.y;
+            }
+        }
+    }
+
+    updateLivesUI() {
+        const livesEl = document.getElementById(`lives-${this.id}`);
+        if (livesEl) {
+            livesEl.innerText = '❤️'.repeat(Math.max(0, this.lives));
+        }
+    }
+
+    generateRow(index) {
+        const leafWidth = Math.min(80, this.canvas.width / 5);
+        const spacing = this.canvas.width / 4;
+        
+        let leaves = [];
+        let q = null;
+        
+        if (index === 0) {
+            leaves.push({
+                x: this.canvas.width / 2,
+                y: this.canvas.height - (index * this.rowSpacing) - 100,
+                value: "MULAI",
+                isCorrect: true,
+                width: leafWidth * 1.5,
+                type: 'normal'
+            });
+        } else {
+            // Menerapkan Fitur Auto-Leveling (Bawa skor saat ini)
+            q = generateQuestion(this.score); 
+            
+            // FITUR 5: Daun Spesial (Power-ups)
+            let specialType = 'normal';
+            let rand = Math.random();
+            if (rand < 0.10) specialType = 'gold';       // 10% peluang daun emas (+20 Poin)
+            else if (rand < 0.15) specialType = 'heart'; // 5% peluang daun hati (+1 Nyawa)
+
+            for(let i=0; i<4; i++) {
+                let isCorr = (q.options[i] === q.correct);
+                leaves.push({
+                    x: (i * spacing) + (spacing / 2),
+                    y: this.canvas.height - (index * this.rowSpacing) - 100,
+                    value: q.options[i],
+                    isCorrect: isCorr,
+                    width: leafWidth,
+                    type: isCorr ? specialType : 'normal' // Hanya daun jawaban benar yang bisa jadi power-up
+                });
+            }
+        }
+        
+        this.rows.push({
+            index: index,
+            y: this.canvas.height - (index * this.rowSpacing) - 100,
+            leaves: leaves,
+            question: q
+        });
+    }
+
+    updateQuestion() {
+        const nextRow = this.rows[this.currentRowIndex + 1];
+        if (nextRow && nextRow.question) {
+            this.qBox.innerText = nextRow.question.text;
+        }
+    }
+
+    handleInput(e) {
+        if (this.isGameOver || this.frog.isJumping || this.frog.isFalling || this.isShowingFeedback) return;
+        if (isPaused) return; // Abaikan input jika game dijeda
+        
+        const rect = this.canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const nextRow = this.rows[this.currentRowIndex + 1];
+        if (!nextRow) return;
+
+        let closestLeaf = null;
+        let minDistance = Infinity;
+
+        for (let leaf of nextRow.leaves) {
+            let dist = Math.abs(x - leaf.x);
+            if (dist < minDistance) {
+                minDistance = dist;
+                closestLeaf = leaf;
+            }
+        }
+
+        if (closestLeaf && minDistance < closestLeaf.width * 1.5) {
+            this.jumpTo(closestLeaf);
+        }
+    }
+
+    jumpTo(leaf) {
+        initAudio(); 
+        this.frog.isJumping = true;
+        this.frog.startX = this.frog.x;
+        this.frog.startY = this.frog.y;
+        this.frog.targetX = leaf.x;
+        this.frog.targetY = leaf.y;
+        this.frog.progress = 0;
+        
+        this.jumpTargetCorrect = leaf.isCorrect;
+        this.jumpedLeaf = leaf; 
+        playJump();
+    }
+
+    createSplash() {
+        playSplash();
+        for(let i=0; i<30; i++) {
+            this.particles.push({
+                x: this.frog.x,
+                y: this.frog.y + this.cameraY,
+                vx: (Math.random() - 0.5) * 10,
+                vy: (Math.random() - 1) * 10,
+                life: 1.0
+            });
+        }
+        this.ripples.push({
+            x: this.frog.x,
+            y: this.frog.y + this.cameraY,
+            radius: 10,
+            alpha: 1.0
+        });
+    }
+
+    respawnFrog() {
+        let nextRow = this.rows[this.currentRowIndex + 1];
+        if (nextRow) {
+            nextRow.leaves = nextRow.leaves.filter(l => l !== this.jumpedLeaf);
+        }
+        this.frog.x = this.frog.startX;
+        this.frog.y = this.frog.startY;
+        this.frog.targetX = this.frog.startX;
+        this.frog.targetY = this.frog.startY;
+    }
+
+    triggerGameOver() {
+        this.isGameOver = true;
+        saveScore(this.name, registeredSchool, this.score);
+        
+        // FITUR 1: Tentukan Predikat Rapor Belajar
+        let predikat = "Terus Berlatih! 💪";
+        if (this.score >= 200) predikat = "Jenius Matematika! 🌟";
+        else if (this.score >= 100) predikat = "Luar Biasa! 🏆";
+        else if (this.score >= 50) predikat = "Hebat Sekali! 👍";
+
+        document.getElementById(`predikat-${this.id}`).innerText = predikat;
+        document.getElementById(`benar-${this.id}`).innerText = this.correctCount;
+        document.getElementById(`salah-${this.id}`).innerText = this.wrongCount;
+
+        for(let i=0; i<100; i++) {
+            this.rain.push({
+                x: Math.random() * this.canvas.width,
+                y: Math.random() * this.canvas.height,
+                speed: 15 + Math.random() * 10,
+                length: 10 + Math.random() * 20
+            });
+        }
+
+        setTimeout(() => {
+            document.getElementById(`final-score-${this.id}`).innerText = this.score;
+            this.gameOverOverlay.classList.add('active');
+            checkAllPlayersStatus(); 
+        }, 1500);
+    }
+
+    update(dt) {
+        // Jika sedang pause, tidak melakukan update logika apapun
+        if (isPaused) return;
+
+        // FITUR 1: Feedback timer (Jeda melihat jawaban yang benar saat tercebur)
+        if (this.isShowingFeedback) {
+            this.feedbackTimer -= dt;
+            if (this.feedbackTimer <= 0) {
+                this.isShowingFeedback = false;
+                this.respawnFrog();
+                this.timeLeft = this.maxTime; // Reset timer setelah respawn
+            }
+            return; // Skip update lompatan saat sedang pause animasi ini
+        }
+
+        // FITUR 3: Timer Combo (Berkurang seiring waktu)
+        if (this.comboTimer > 0) {
+            this.comboTimer -= dt;
+            if (this.comboTimer <= 0) this.comboCount = 0; // Combo putus jika kelamaan
+        }
+
+        // FITUR 4: Transisi Tema Latar Belakang berdasarkan Skor
+        if (this.score >= 200 && this.currentTheme !== 2) {
+            this.currentTheme = 2; // Malam
+            this.wrapper.style.background = 'linear-gradient(to bottom, #0f2027, #203a43)';
+        } else if (this.score >= 100 && this.score < 200 && this.currentTheme !== 1) {
+            this.currentTheme = 1; // Sore
+            this.wrapper.style.background = 'linear-gradient(to bottom, #ff7e5f, #feb47b)';
+        }
+
+        // FITUR 4: Timer Waktu (Game Over jika habis)
+        if (!this.frog.isJumping && !this.frog.isFalling && !this.isGameOver && this.currentRowIndex > 0) {
+            this.timeLeft -= dt;
+            if (this.timeLeft <= 0) {
+                this.timeLeft = 0;
+                // Trigger logic jatuh karena habis waktu
+                this.frog.isFalling = true;
+                this.frog.startY = this.frog.y;
+                this.frog.targetY = this.frog.y + 200;
+                this.frog.progress = 0;
+            }
+        }
+
+        this.cameraY += (this.targetCameraY - this.cameraY) * 0.1;
+
+        if (this.frog.isJumping) {
+            this.frog.progress += 0.05; 
+            if (this.frog.progress >= 1) {
+                this.frog.progress = 1;
+                this.frog.isJumping = false;
+                this.frog.x = this.frog.targetX;
+                this.frog.y = this.frog.targetY;
+
+                if (this.jumpTargetCorrect) {
+                    playCorrect();
+                    
+                    // FITUR 1 & 3: Rekap Benar & Poin Combo
+                    this.correctCount++;
+                    this.comboCount++;
+                    this.comboTimer = 5.0; // Punya waktu 5 detik ke soal selanjutnya untuk jaga combo
+                    
+                    let extraComboScore = 0;
+                    if (this.comboCount >= 3) {
+                        extraComboScore = 5 * (this.comboCount - 2); // Tambah +5, +10, dst
+                    }
+
+                    // FITUR 5: Perhitungan Skor Power-Ups
+                    if (this.jumpedLeaf.type === 'gold') {
+                        this.score += 20 + extraComboScore; 
+                    } else if (this.jumpedLeaf.type === 'heart') {
+                        this.score += 10 + extraComboScore;
+                        this.lives = Math.min(this.lives + 1, 3); 
+                        this.updateLivesUI();
+                    } else {
+                        this.score += 10 + extraComboScore;
+                    }
+                    
+                    document.getElementById(`score-${this.id}`).innerText = `Skor: ${this.score}`;
+                    
+                    this.currentRowIndex++;
+                    this.timeLeft = this.maxTime; // Reset Timer untuk soal berikutnya
+
+                    let currentRowObj = this.rows[this.currentRowIndex];
+                    if (currentRowObj) {
+                        currentRowObj.leaves = currentRowObj.leaves.filter(l => l.isCorrect);
+                    }
+
+                    this.generateRow(this.currentRowIndex + 2); 
+                    this.targetCameraY += this.rowSpacing; 
+                    this.updateQuestion();
+
+                } else {
+                    this.frog.isFalling = true;
+                    this.frog.startY = this.frog.y;
+                    this.frog.targetY = this.frog.y + 200; 
+                    this.frog.progress = 0;
+                }
+            } else {
+                let t = this.frog.progress;
+                this.frog.x = this.frog.startX + (this.frog.targetX - this.frog.startX) * t;
+                let arch = 100 * Math.sin(t * Math.PI); 
+                this.frog.y = this.frog.startY + (this.frog.targetY - this.frog.startY) * t - arch;
+            }
+        } else if (this.frog.isFalling) {
+            this.frog.progress += 0.05;
+            let t = this.frog.progress;
+            this.frog.y = this.frog.startY + (this.frog.targetY - this.frog.startY) * (t*t); 
+            if (this.frog.progress >= 1) {
+                this.frog.isFalling = false;
+                this.createSplash();
+                this.lives--;
+                
+                // FITUR 1 & 3: Rekap Salah & Putuskan Combo
+                this.wrongCount++;
+                this.comboCount = 0;
+                
+                this.updateLivesUI();
+
+                if (this.lives <= 0) {
+                    this.triggerGameOver();
+                } else {
+                    // Memicu FITUR 1: Feedback sebelum respawn
+                    this.isShowingFeedback = true;
+                    this.feedbackTimer = 2.0; // Tampilkan jawaban selama 2 detik
+                    
+                    // Temukan jawaban yang benar pada baris yang sedang dimainkan
+                    let nextRow = this.rows[this.currentRowIndex + 1];
+                    if (nextRow && nextRow.question) {
+                        this.correctAnswerText = nextRow.question.correct;
+                    } else {
+                        this.correctAnswerText = "";
+                    }
+                }
+            }
+        }
+
+        // Update Partikel Animasi (Independen dari Timer)
+        for (let p of this.particles) {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.5; 
+            p.life -= 0.02;
+        }
+        this.particles = this.particles.filter(p => p.life > 0);
+
+        for (let r of this.ripples) {
+            r.radius += 2;
+            r.alpha -= 0.02;
+        }
+        this.ripples = this.ripples.filter(r => r.alpha > 0);
+        
+        for (let r of this.rain) {
+            r.y += r.speed;
+            r.x -= r.speed * 0.2;
+            if (r.y > this.canvas.height) {
+                r.y = -r.length;
+                r.x = Math.random() * this.canvas.width;
+            }
+        }
+    }
+
+    draw() {
+        const ctx = this.ctx;
+        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // FITUR 4: Gambar Bintang Jika Tema Malam
+        if (this.currentTheme === 2) {
+            for (let s of this.stars) {
+                ctx.fillStyle = `rgba(255, 255, 255, ${s.alpha})`;
+                ctx.beginPath();
+                // Bintang bergeser sedikit saat kamera naik
+                ctx.arc((s.x + this.cameraY*0.05) % this.canvas.width, (s.y + this.cameraY*0.05) % this.canvas.height, s.size, 0, Math.PI*2);
+                ctx.fill();
+                
+                // Animasi kelap-kelip
+                s.alpha += (Math.random() - 0.5) * 0.1;
+                if (s.alpha < 0.1) s.alpha = 0.1;
+                if (s.alpha > 0.8) s.alpha = 0.8;
+            }
+        }
+
+        // Draw Water
+        ctx.fillStyle = 'rgba(255,255,255,0.05)';
+        for(let i=0; i<5; i++) {
+            ctx.beginPath();
+            let waveY = (this.canvas.height/5)*i + (Math.sin(Date.now()*0.001 + i) * 10);
+            ctx.ellipse(this.canvas.width/2, waveY, this.canvas.width/1.5, 20, 0, 0, Math.PI*2);
+            ctx.fill();
+        }
+
+        ctx.save();
+        ctx.translate(0, this.cameraY); 
+
+        // Draw Leaves
+        for (let row of this.rows) {
+            let visualY = row.y + this.cameraY;
+            if (visualY > this.canvas.height + 200 || visualY < -200) continue;
+
+            for (let leaf of row.leaves) {
+                // Shadow
+                ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                ctx.beginPath();
+                ctx.ellipse(leaf.x, leaf.y + 10, leaf.width/2, leaf.width/5, 0, 0, Math.PI*2);
+                ctx.fill();
+
+                // Base Color by Type (FITUR 5)
+                let mainColor = '#2E7D32'; // Hijau normal
+                let highlightColor = '#4CAF50';
+                
+                if (leaf.type === 'gold') {
+                    mainColor = '#B8860B'; highlightColor = '#FFD700'; // Daun Emas
+                } else if (leaf.type === 'heart') {
+                    mainColor = '#C2185B'; highlightColor = '#FF4081'; // Daun Hati Merah Muda
+                }
+
+                ctx.fillStyle = mainColor;
+                ctx.beginPath();
+                ctx.ellipse(leaf.x, leaf.y, leaf.width/2, leaf.width/3.5, 0, 0, Math.PI * 1.8);
+                ctx.lineTo(leaf.x, leaf.y);
+                ctx.fill();
+
+                ctx.fillStyle = highlightColor;
+                ctx.beginPath();
+                ctx.ellipse(leaf.x, leaf.y, leaf.width/2.2, leaf.width/4.5, 0, 0, Math.PI * 1.8);
+                ctx.lineTo(leaf.x, leaf.y);
+                ctx.fill();
+
+                // Draw Text / Icon
+                ctx.fillStyle = 'white';
+                ctx.font = `bold ${Math.max(16, leaf.width/3)}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 3;
+                
+                // Tambahkan ikon kecil jika ini power-up
+                let displayText = leaf.value;
+                if (leaf.type === 'gold') displayText += " ⭐";
+                if (leaf.type === 'heart') displayText += " 💖";
+
+                ctx.strokeText(displayText, leaf.x - 2, leaf.y);
+                ctx.fillText(displayText, leaf.x - 2, leaf.y);
+            }
+        }
+
+        // Draw Frog
+        if (!this.isGameOver || this.frog.isFalling) {
+            ctx.save();
+            ctx.translate(this.frog.x, this.frog.y);
+            
+            if (this.frog.isJumping) {
+                let scale = 1 + Math.sin(this.frog.progress * Math.PI) * 0.2;
+                ctx.scale(scale, scale);
+            }
+
+            ctx.fillStyle = 'rgba(0,0,0,0.4)';
+            ctx.beginPath();
+            ctx.ellipse(0, 15, 20, 8, 0, 0, Math.PI*2);
+            ctx.fill();
+
+            // FITUR 3: Animasi Api Combo (Digambar di belakang katak)
+            if (this.comboCount >= 3) {
+                let flicker = Math.random() * 5;
+                ctx.fillStyle = 'rgba(255, 87, 34, 0.6)'; // Api Oranye
+                ctx.beginPath();
+                ctx.ellipse(0, 0, 25 + flicker, 20 + flicker, 0, 0, Math.PI*2);
+                ctx.fill();
+                
+                ctx.fillStyle = 'rgba(255, 235, 59, 0.7)'; // Api Kuning
+                ctx.beginPath();
+                ctx.ellipse(0, 0, 20 + flicker, 15 + flicker, 0, 0, Math.PI*2);
+                ctx.fill();
+            }
+
+            // Body (FITUR 3: Menggunakan warna pilihan pendaftaran)
+            ctx.fillStyle = this.color; 
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 20, 15, 0, 0, Math.PI*2);
+            ctx.fill();
+            
+            ctx.fillStyle = 'rgba(255,255,255,0.4)'; // Belly shading transparan
+            ctx.beginPath();
+            ctx.ellipse(0, 5, 12, 8, 0, 0, Math.PI*2);
+            ctx.fill();
+
+            ctx.fillStyle = 'white';
+            ctx.beginPath(); ctx.arc(-10, -12, 6, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(10, -12, 6, 0, Math.PI*2); ctx.fill();
+            
+            ctx.fillStyle = 'black';
+            ctx.beginPath(); ctx.arc(-10, -12, 2, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(10, -12, 2, 0, Math.PI*2); ctx.fill();
+
+            ctx.restore();
+            
+            // FITUR 3: Teks Combo Melayang di atas Katak
+            if (this.comboCount >= 3) {
+                ctx.save();
+                // Teks bergetar sedikit
+                ctx.translate(this.frog.x, this.frog.y - 45 - (Math.random() * 3));
+                ctx.fillStyle = '#FFD700';
+                ctx.strokeStyle = '#FF4500';
+                ctx.lineWidth = 3;
+                ctx.font = 'bold 20px Arial';
+                ctx.textAlign = 'center';
+                let txt = `COMBO x${this.comboCount}!`;
+                ctx.strokeText(txt, 0, 0);
+                ctx.fillText(txt, 0, 0);
+                ctx.restore();
+            }
+        }
+        
+        ctx.restore(); 
+
+        // Draw Screen-space effects
+        for (let r of this.ripples) {
+            ctx.strokeStyle = `rgba(255, 255, 255, ${r.alpha})`;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.ellipse(r.x, r.y, r.radius, r.radius/2, 0, 0, Math.PI*2);
+            ctx.stroke();
+        }
+
+        for (let p of this.particles) {
+            ctx.fillStyle = `rgba(200, 230, 255, ${p.life})`;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+            ctx.fill();
+        }
+
+        // FITUR 4: Gambar Bar Waktu (Timer) di atas layar
+        if (!this.isGameOver && this.currentRowIndex > 0) {
+            let barWidth = this.canvas.width * (this.timeLeft / this.maxTime);
+            // Berubah warna jadi merah muda-panik jika sisa kurang dari 5 detik
+            ctx.fillStyle = this.timeLeft > 5.0 ? 'rgba(56, 239, 125, 0.8)' : 'rgba(255, 65, 108, 0.8)';
+            ctx.fillRect(0, 0, barWidth, 8);
+        }
+
+        // FITUR 1: Layar Jeda Umpan Balik Edukatif
+        if (this.isShowingFeedback) {
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
+            ctx.fillRect(0, this.canvas.height/2 - 60, this.canvas.width, 120);
+            
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText("Benar: " + this.correctAnswerText, this.canvas.width/2, this.canvas.height/2);
+            
+            ctx.fillStyle = '#ffeb3b';
+            ctx.font = '16px Arial';
+            ctx.fillText("Ayo coba daun yang lain!", this.canvas.width/2, this.canvas.height/2 + 30);
+        }
+
+        // FITUR 6: Gambar Teks Jeda PAUSE
+        if (isPaused) {
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 30px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText("PAUSE", this.canvas.width/2, this.canvas.height/2);
+        }
+
+        if (this.isGameOver) {
+            ctx.strokeStyle = 'rgba(150, 200, 255, 0.4)';
+            ctx.lineWidth = 1;
+            for (let r of this.rain) {
+                ctx.beginPath();
+                ctx.moveTo(r.x, r.y);
+                ctx.lineTo(r.x - r.length*0.2, r.y + r.length);
+                ctx.stroke();
+            }
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.fillRect(0,0, this.canvas.width, this.canvas.height);
+        }
+    }
+}
+
+/* ==========================================================================
+   MAIN GAME LOOP & MANAGER
+   ========================================================================== */
+let players = [];
+let gameLoopId;
+let lastTime = 0; // Digunakan untuk menghitung Delta Time secara akurat
+
+function startGame(numPlayers) {
+    const container = document.getElementById('game-container');
+    container.innerHTML = ''; 
+    container.className = ''; 
+    
+    if (numPlayers === 1) container.classList.add('solo');
+    else if (numPlayers === 2) container.classList.add('duel');
+    else if (numPlayers === 4) container.classList.add('squad');
+
+    isPaused = false; // Pastikan tidak termulai dalam keadaan jeda
+    document.getElementById('btn-pause').innerText = "⏸ Jeda";
+
+    setTimeout(() => {
+        players = [];
+        for(let i=1; i<=numPlayers; i++) {
+            let playerName = registeredNames[i - 1] || `Pemain ${i}`;
+            let playerColor = registeredColors[i - 1] || '#4CAF50';
+            players.push(new PlayerInstance(container, i, playerName, playerColor));
+        }
+
+        if (gameLoopId) cancelAnimationFrame(gameLoopId);
+        lastTime = performance.now(); // Reset waktu awal
+        gameLoop(lastTime);
+    }, 50);
+}
+
+function gameLoop(currentTime) {
+    // Menghitung jeda waktu dalam satuan detik (Delta Time / dt)
+    let dt = (currentTime - lastTime) / 1000;
+    lastTime = currentTime;
+    
+    // Mencegah error lompatan besar jika pengguna baru kembali dari tab browser yang lain
+    if (dt > 0.1) dt = 0.1;
+
+    for (let p of players) {
+        p.update(dt);
+        p.draw();
+    }
+    gameLoopId = requestAnimationFrame(gameLoop);
+}
+
+function checkAllPlayersStatus() {
+    const allDead = players.every(p => p.isGameOver);
+    if (allDead) {
+        // Sembunyikan tombol pause jika game selesai
+        document.getElementById('btn-pause').style.display = 'none';
+        setTimeout(() => {
+            const menu = document.getElementById('menu');
+            menu.classList.remove('hidden');
+            menu.querySelector('.subtitle').innerText = "Semua Pemain Selesai!";
+        }, 1000);
+    }
+}
+
+// Fungsi Bantuan Tutorial
+function showTutorial() {
+    initAudio();
+    document.getElementById('tutorial-modal').classList.add('active');
+}
+
+function closeTutorial() {
+    document.getElementById('tutorial-modal').classList.remove('active');
+}
+
+</script>
+</body>
+</html>
