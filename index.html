@@ -645,6 +645,7 @@
             flex-direction: column;
             justify-content: space-between;
             padding: 10px;
+            padding-top: 65px; /* PERBAIKAN: Jarak atas agar tidak tertutup tombol Fullscreen */
         }
 
         .player-header {
@@ -1967,11 +1968,20 @@ function checkAllPlayersStatus() {
     if (allDead) {
         // Sembunyikan tombol pause jika game selesai
         document.getElementById('btn-pause').style.display = 'none';
+        
+        // PERBAIKAN: Beri jeda 7 detik agar pemain bisa membaca rapor sebelum kembali ke menu
         setTimeout(() => {
             const menu = document.getElementById('menu');
             menu.classList.remove('hidden');
             menu.querySelector('.subtitle').innerText = "Semua Pemain Selesai!";
-        }, 1000);
+            
+            // PERBAIKAN: Bersihkan kanvas dan sisa elemen agar tidak berbayang di belakang menu
+            document.getElementById('game-container').innerHTML = '';
+            if (gameLoopId) {
+                cancelAnimationFrame(gameLoopId);
+                gameLoopId = null;
+            }
+        }, 7000); 
     }
 }
 
