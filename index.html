@@ -19,7 +19,8 @@
             padding: 0;
             user-select: none;
             -webkit-user-select: none;
-            touch-action: none;
+            /* PERBAIKAN: touch-action diubah agar gestur scroll alami diizinkan di perangkat mobile/IFP */
+            touch-action: manipulation;
         }
 
         body {
@@ -267,6 +268,9 @@
             margin-top: 20px;
             max-height: 80vh;
             overflow-y: auto;
+            /* PERBAIKAN: Aktifkan scroll vertikal yang halus di HP/IFP */
+            touch-action: pan-y;
+            -webkit-overflow-scrolling: touch;
         }
 
         .form-container label {
@@ -530,6 +534,9 @@
             background: rgba(0,0,0,0.3);
             scrollbar-width: thin;
             scrollbar-color: #38ef7d rgba(0,0,0,0.2);
+            /* PERBAIKAN: Aktifkan scroll vertikal yang mulus di HP/IFP */
+            touch-action: pan-y;
+            -webkit-overflow-scrolling: touch;
         }
 
         .table-container::-webkit-scrollbar { width: 6px; }
